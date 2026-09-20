@@ -43,6 +43,7 @@ pub(super) fn sampler_failure_reason(error: &LunaSamplerError) -> &'static str {
             ApiError::Transport(TransportError::Build(_)) => "request_build_error",
             ApiError::Transport(TransportError::ResponseTooLarge { .. }) => "response_too_large",
             ApiError::Stream(_) => "stream_error",
+            ApiError::WebsocketMessageTooLarge => "websocket_message_too_large",
             ApiError::ContextWindowExceeded => "context_window_exceeded",
             ApiError::QuotaExceeded => "quota_exceeded",
             ApiError::UsageNotIncluded => "usage_not_included",
