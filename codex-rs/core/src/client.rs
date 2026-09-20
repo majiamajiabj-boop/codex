@@ -147,6 +147,7 @@ use codex_model_provider_info::DEFAULT_WEBSOCKET_CONNECT_TIMEOUT_MS;
 use codex_model_provider_info::ModelProviderInfo;
 use codex_model_provider_info::WireApi;
 use codex_protocol::error::CodexErr;
+use codex_protocol::error::CodexErrorDetails;
 use codex_protocol::error::Result;
 use codex_response_debug_context::extract_response_debug_context;
 use codex_response_debug_context::extract_response_debug_context_from_api_error;
@@ -2109,6 +2110,15 @@ impl ModelClientSession {
                 while let Some(event) = stream.next().await {
                     match event {
                         Ok(ResponseEvent::Completed { .. }) => break,
+                        Err(err)
+                            if matches!(
+                                err.details(),
+                                CodexErrorDetails::WebsocketMessageTooLarge
+                            ) =>
+                        {
+                            self.try_switch_fallback_transport(session_telemetry, model_info);
+                            break;
+                        }
                         Err(err) => return Err(err),
                         _ => {}
                     }
