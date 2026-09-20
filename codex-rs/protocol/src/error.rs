@@ -93,6 +93,10 @@ pub enum CodexErrorDetails {
     /// The Session loop treats this as a transient error and will automatically retry the turn.
     #[error("stream disconnected before completion: {0}")]
     Stream(String),
+    /// A rejected WebSocket message cannot succeed unchanged on that transport.
+    /// The Responses caller may recover by switching to HTTP instead of retrying.
+    #[error("server rejected the WebSocket message as too large (close code 1009)")]
+    WebsocketMessageTooLarge,
     /// A retryable upstream rate limit received inside the response stream.
     #[error("rate limit exceeded: {0}")]
     RateLimitExceeded(String),
@@ -386,6 +390,7 @@ impl CodexErr {
             | CodexErrorDetails::UsageNotIncluded
             | CodexErrorDetails::QuotaExceeded
             | CodexErrorDetails::InvalidImageRequest()
+            | CodexErrorDetails::WebsocketMessageTooLarge
             | CodexErrorDetails::InvalidRequest(_)
             | CodexErrorDetails::ToolCollision(_)
             | CodexErrorDetails::RefreshTokenFailed(_)
