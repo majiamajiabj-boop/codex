@@ -5,6 +5,17 @@ use codex_protocol::protocol::RateLimitReachedType;
 use pretty_assertions::assert_eq;
 
 #[test]
+fn map_api_error_preserves_websocket_size_rejection() {
+    let err = map_api_error(ApiError::WebsocketMessageTooLarge);
+    assert!(matches!(
+        err.details(),
+        CodexErrorDetails::WebsocketMessageTooLarge
+    ));
+    assert_eq!(err.retry_delay(/*retry_count*/ 1), None);
+    assert_eq!(err.http_status_code_value(), None);
+}
+
+#[test]
 fn map_api_error_maps_server_overloaded() {
     let err = map_api_error(ApiError::ServerOverloaded);
     assert!(matches!(err.details(), CodexErrorDetails::ServerOverloaded));

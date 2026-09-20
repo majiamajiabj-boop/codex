@@ -56,6 +56,27 @@ pub(crate) async fn handle_response_stream_error(
     turn_context: &TurnContext,
     request: ResponsesStreamRequest,
 ) -> Result<(), CodexErr> {
+    // Replaying the same message cannot recover from a size rejection. Attempt
+    // the existing sticky HTTP fallback before consulting the retry budget,
+    // including when retries are disabled. Other callers treat this as terminal.
+    if matches!(err.details(), CodexErrorDetails::WebsocketMessageTooLarge) {
+        if client_session.try_switch_fallback_transport(
+            &turn_context.session_telemetry,
+            turn_context.model_info(),
+        ) {
+            sess.send_event(
+                turn_context,
+                EventMsg::Warning(WarningEvent {
+                    message: format!("Falling back from WebSockets to HTTPS transport. {err:#}"),
+                }),
+            )
+            .await;
+            retry_state.retries = 0;
+            return Ok(());
+        }
+        return Err(err);
+    }
+
     let operation = match request {
         ResponsesStreamRequest::Sampling => RetryOperation::Sampling,
         ResponsesStreamRequest::RemoteCompactionV2 => RetryOperation::RemoteCompactionV2,

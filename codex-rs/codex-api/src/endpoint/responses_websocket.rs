@@ -35,6 +35,7 @@ use tokio_tungstenite::tungstenite::Error as WsError;
 use tokio_tungstenite::tungstenite::Message;
 use tokio_tungstenite::tungstenite::client::IntoClientRequest;
 use tokio_tungstenite::tungstenite::protocol::CloseFrame;
+use tokio_tungstenite::tungstenite::protocol::frame::coding::CloseCode;
 use tracing::Instrument;
 use tracing::Span;
 use tracing::debug;
@@ -813,6 +814,9 @@ async fn run_websocket_response_stream(
             }
             Message::Binary(_) => {
                 return Err(ApiError::Stream("unexpected binary websocket event".into()));
+            }
+            Message::Close(Some(frame)) if frame.code == CloseCode::Size => {
+                return Err(ApiError::WebsocketMessageTooLarge);
             }
             Message::Close(_) => {
                 return Err(ApiError::Stream(

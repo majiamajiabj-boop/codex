@@ -13,6 +13,8 @@ pub enum ApiError {
     Api { status: StatusCode, message: String },
     #[error("stream error: {0}")]
     Stream(String),
+    #[error("server rejected the WebSocket message as too large (close code 1009)")]
+    WebsocketMessageTooLarge,
     #[error("context window exceeded")]
     ContextWindowExceeded,
     #[error("quota exceeded")]

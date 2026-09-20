@@ -85,6 +85,7 @@ impl SamplingExecution {
                 ApiError::Transport(
                     TransportError::Build(_) | TransportError::ResponseTooLarge { .. },
                 )
+                | ApiError::WebsocketMessageTooLarge
                 | ApiError::ContextWindowExceeded
                 | ApiError::QuotaExceeded
                 | ApiError::UsageNotIncluded

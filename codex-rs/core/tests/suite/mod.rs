@@ -218,6 +218,7 @@ mod user_shell_cmd;
 mod view_image;
 mod web_search;
 mod websocket_fallback;
+mod websocket_message_too_large;
 mod window_headers;
 #[cfg(target_os = "windows")]
 mod windows_sandbox;
